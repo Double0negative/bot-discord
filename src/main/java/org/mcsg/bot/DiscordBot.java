@@ -3,6 +3,8 @@ package org.mcsg.bot;
 import org.mcsg.bot.api.BotChat;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
+import org.mcsg.bot.util.StringUtils;
+
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -67,5 +69,17 @@ public class DiscordBot extends GenericBot{
 	@Override
 	public String getVersion() {
 		return "Phoenix";
+	}
+
+	@Override
+	public String getBrandingString() {
+		return StringUtils.replaceVars(
+				"{0} version {1} [{2}] implementing {3} version {4} [{5}]",
+				this.getClientName(),
+				this.getVersion(),
+				this.getRepo(),
+				super.getClientName(),
+				super.getVersion(),
+				super.getRepo());
 	}
 }
