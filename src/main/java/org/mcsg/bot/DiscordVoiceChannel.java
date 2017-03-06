@@ -6,6 +6,7 @@ import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.OperationNotSupportedException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.mcsg.bot.api.BotSentMessage;
@@ -134,6 +135,11 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	
 	public void play() {
 		audio.setPaused(false);
+	}
+
+	@Override
+	public void sendFile(File file) {
+		throw new UnsupportedOperationException();
 	}
 	
 

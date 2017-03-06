@@ -1,5 +1,7 @@
 package org.mcsg.bot;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +95,17 @@ public class DiscordChannel implements BotChannel {
 		for(String msg : queue)
 			sb.append(msg).append("\n");
 		return sendMessage(sb.toString());
+	}
+
+	@Override
+	public void sendFile(File file) {
+		try {
+			channel.sendFile(file);
+		} catch (FileNotFoundException | DiscordException | RateLimitException | MissingPermissionsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 
