@@ -3,7 +3,7 @@ package org.mcsg.bot;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mcsg.bot.api.BotChat;
+import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotSentMessage;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
@@ -15,14 +15,14 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
-public class DiscordChat implements BotChat {
+public class DiscordChannel implements BotChannel {
 
 	private IChannel channel;
 	private BotServer server;
 	
 	private List<String> queue;
 	
-	public DiscordChat(IChannel channel, BotServer server) {
+	public DiscordChannel(IChannel channel, BotServer server) {
 		this.channel = channel;
 		this.server = server;
 		

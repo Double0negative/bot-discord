@@ -3,7 +3,7 @@ package org.mcsg.bot;
 import java.util.List;
 
 import org.mcsg.bot.api.Bot;
-import org.mcsg.bot.api.BotChat;
+import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
@@ -21,7 +21,7 @@ public class DiscordServer implements BotServer {
 	
 	
 	@Override
-	public List<BotChat> getChats() {
+	public List<BotChannel> getChats() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -36,6 +36,10 @@ public class DiscordServer implements BotServer {
 	@Override
 	public Bot getBot() {
 		return bot;
+	}
+	
+	public IGuild getHandle() {
+		return guild;
 	}
 
 	

@@ -1,6 +1,6 @@
 package org.mcsg.bot;
 
-import org.mcsg.bot.api.BotChat;
+import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotSentMessage;
 
 import sx.blah.discord.handle.obj.IMessage;
@@ -26,8 +26,8 @@ public class DiscordSentMessage implements BotSentMessage{
 	}
 
 	@Override
-	public BotChat getChat() {
-		return new DiscordChat(message.getChannel(), new DiscordServer(message.getGuild(), bot));
+	public BotChannel getChat() {
+		return new DiscordChannel(message.getChannel(), new DiscordServer(message.getGuild(), bot));
 	}
 
 	@Override

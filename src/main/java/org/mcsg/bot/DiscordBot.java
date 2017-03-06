@@ -1,13 +1,19 @@
 package org.mcsg.bot;
 
-import org.mcsg.bot.api.BotChat;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
+import org.mcsg.bot.api.BotVoiceChannel;
 import org.mcsg.bot.util.StringUtils;
 
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IVoiceChannel;
 
 public class DiscordBot extends GenericBot{
 
@@ -23,6 +29,7 @@ public class DiscordBot extends GenericBot{
 	
 	
 	private IDiscordClient client;
+	private Map<IGuild, DiscordVoiceChannel> voices;
 	
 	
 	private DiscordBot() {
@@ -30,13 +37,21 @@ public class DiscordBot extends GenericBot{
 		ClientBuilder builder = new ClientBuilder();
 		builder.withToken(getSettings().get("discord.token"));
 		
+		this.voices = new HashMap<>();
+		
 		try {
 			client = builder.login();
 			client.getDispatcher().registerListener(new DiscordListener(this.getCommandHandler(), this));
 			
+			
+			
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void addVoice(IGuild guild, DiscordVoiceChannel channel) {
+		this.voices.put(guild, channel);
 	}
 
 	@Override
@@ -45,10 +60,10 @@ public class DiscordBot extends GenericBot{
 	}
 
 	@Override
-	public BotChat getChat(String id) {
+	public BotChannel getChat(String id) {
 		IChannel channel = client.getChannelByID(id);
 		
-		return new DiscordChat(channel, new DiscordServer(channel.getGuild(), this));
+		return new DiscordChannel(channel, new DiscordServer(channel.getGuild(), this));
 	}
 
 	@Override
@@ -81,5 +96,11 @@ public class DiscordBot extends GenericBot{
 				super.getClientName(),
 				super.getVersion(),
 				super.getRepo());
+	}
+
+	@Override
+	public BotVoiceChannel getVoiceChannel(BotChannel channel) {
+		BotVoiceChannel voice =  voices.get(((DiscordServer)channel.getServer()).getHandle());
+		return voice;
 	}
 }
