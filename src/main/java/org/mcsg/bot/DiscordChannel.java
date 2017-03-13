@@ -2,6 +2,8 @@ package org.mcsg.bot;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +72,7 @@ public class DiscordChannel implements BotChannel {
 	public BotSentMessage sendError(String error) {
 		BotSentMessage bsm = null;
 		try {
-			IMessage im = channel.sendMessage("``` \n Error: \n " + error);
+			IMessage im = channel.sendMessage("```Error: \n\n " + error + " ```");
 			bsm = new DiscordSentMessage(im, (DiscordBot) getServer().getBot());
 		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 			// TODO Auto-generated catch block
@@ -81,7 +83,11 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void sendThrowable(Throwable throwable) {
-		throwable.printStackTrace();
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		throwable.printStackTrace(pw);
+		 // stack trace as a string
+		this.sendError(sw.toString());
 	}
 
 	@Override
@@ -98,14 +104,8 @@ public class DiscordChannel implements BotChannel {
 	}
 
 	@Override
-	public void sendFile(File file) {
-		try {
+	public void sendFile(File file) throws Exception{
 			channel.sendFile(file);
-		} catch (FileNotFoundException | DiscordException | RateLimitException | MissingPermissionsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 
 
