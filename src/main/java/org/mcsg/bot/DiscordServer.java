@@ -42,6 +42,18 @@ public class DiscordServer implements BotServer {
 		return guild;
 	}
 
+
+	@Override
+	public String getId() {
+		return guild.getID();
+	}
+
+
+	@Override
+	public String getName() {
+		return guild.getName();
+	}
+
 	
 	
 }

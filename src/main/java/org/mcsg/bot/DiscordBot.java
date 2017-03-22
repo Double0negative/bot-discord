@@ -7,6 +7,7 @@ import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 import org.mcsg.bot.api.BotVoiceChannel;
+import org.mcsg.bot.util.DelayedActionMessage;
 import org.mcsg.bot.util.StringUtils;
 
 import sx.blah.discord.api.ClientBuilder;
@@ -31,11 +32,13 @@ public class DiscordBot extends GenericBot{
 	private IDiscordClient client;
 	private Map<IGuild, DiscordVoiceChannel> voices;
 	
+	private BotChannel defaultChannel;
+	
 	
 	private DiscordBot() {
 		super();
 		ClientBuilder builder = new ClientBuilder();
-		builder.withToken(getSettings().get("discord.token"));
+		builder.withToken(getSettings().getString("discord.token"));
 		
 		this.voices = new HashMap<>();
 		
@@ -48,6 +51,24 @@ public class DiscordBot extends GenericBot{
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public BotVoiceChannel connectVoiceChannel(String id, String chatid) {
+		System.out.println(id + " " + chatid);
+		IVoiceChannel vchannel = client.getVoiceChannelByID(id);
+		DiscordChannel channel = (DiscordChannel)getChat(chatid);
+		DiscordServer server = (DiscordServer) channel.getServer();
+		
+		DiscordVoiceChannel voice = new DiscordVoiceChannel(vchannel,channel, server);
+		
+		addVoice(vchannel.getGuild(), voice);
+		
+		voice.connnect();
+		
+		log("Voice", "Connected to #" + channel.getName() + " in server " + server.getName());
+		
+				
+		return voice;
 	}
 	
 	public void addVoice(IGuild guild, DiscordVoiceChannel channel) {
@@ -102,5 +123,26 @@ public class DiscordBot extends GenericBot{
 	public BotVoiceChannel getVoiceChannel(BotChannel channel) {
 		BotVoiceChannel voice =  voices.get(((DiscordServer)channel.getServer()).getHandle());
 		return voice;
+	}
+
+	public void setDefaultChannel(BotChannel botChannel) {
+		this.defaultChannel = botChannel;
+	}
+	
+	@Override
+	public BotChannel getDefaultChat() {
+		return defaultChannel;
+	}
+
+	private DelayedActionMessage logger;
+	
+	@Override
+	public void log(String log) {
+		getDefaultChat().sendMessage(log);
+	}
+
+	@Override
+	public void log(String prefix, String log) {
+		log("[" + prefix + "] " + log);
 	}
 }

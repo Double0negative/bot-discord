@@ -5,10 +5,15 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.mcsg.bot.api.BotChannel;
+import org.mcsg.bot.api.BotServer;
+import org.mcsg.bot.api.BotVoiceChannel;
 import org.mcsg.bot.command.CommandHandler;
 
 import sx.blah.discord.api.events.EventSubscriber;
@@ -37,17 +42,19 @@ public class DiscordListener {
 
 	@EventSubscriber
 	public void onReadyEvent(ReadyEvent event) {
+		bot.setDefaultChannel(bot.getChat(bot.getSettings().getString("discord.default-channel")));
 		
-
+		bot.log("System", "Bot started...");
+		
 		//todo: actually configure what its connecting to somehow
 		
-		DiscordVoiceChannel voice = new DiscordVoiceChannel(
-				event.getClient().getGuilds().get(0).getVoiceChannels().get(0), 
-				new DiscordServer(event.getClient().getGuilds().get(0), bot));
+		List<Map> con = bot.getSettings().getList("discord.voice");
+		System.out.println(con.get(0).getClass());
 		
-		bot.addVoice(event.getClient().getGuilds().get(0), voice);
-
-		voice.connnect();
+		for(Map<String, String> values : con) {
+			bot.connectVoiceChannel(values.get("voice"), values.get("chat"));
+		}
+	
 
 	}
 

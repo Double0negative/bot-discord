@@ -108,5 +108,10 @@ public class DiscordChannel implements BotChannel {
 			channel.sendFile(file);
 	}
 
+	@Override
+	public String getName() {
+		return channel.getName();
+	}
+
 
 }

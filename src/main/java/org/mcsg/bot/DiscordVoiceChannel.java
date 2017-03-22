@@ -25,12 +25,13 @@ import sx.blah.discord.util.audio.AudioPlayer;
 public class DiscordVoiceChannel implements BotVoiceChannel{
 
 	private IVoiceChannel channel;
+	private DiscordChannel chat;
 	private DiscordServer server;
 	
 	private List<File> queue;
 	private AudioPlayer audio;
 	
-	public DiscordVoiceChannel(IVoiceChannel channel, DiscordServer server) {
+	public DiscordVoiceChannel(IVoiceChannel channel,DiscordChannel chat, DiscordServer server) {
 		this.channel = channel;
 		this.server = server;
 		this.queue = new ArrayList<File>();
@@ -59,23 +60,22 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 
 	@Override
 	public BotSentMessage sendMessage(String msg) {
-		throw new UnsupportedOperationException();
+		return chat.sendMessage(msg);
 	}
 
 	@Override
 	public void queueMessage(String msg) {
-		throw new UnsupportedOperationException();
+		 chat.queueMessage(msg);
 	}
 
 	@Override
 	public BotSentMessage commitMessage() {
-		throw new UnsupportedOperationException();
+		return chat.commitMessage();
 	}
 
 	@Override
 	public BotSentMessage sendError(String error) {
-		throw new UnsupportedOperationException();
-
+		return chat.sendError(error);
 	}
 
 	@Override
@@ -140,6 +140,11 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	@Override
 	public void sendFile(File file) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getName() {
+		return channel.getName();
 	}
 	
 
