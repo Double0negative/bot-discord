@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotSentMessage;
@@ -21,9 +23,11 @@ import sx.blah.discord.util.RateLimitException;
 
 public class DiscordChannel implements BotChannel {
 
+	private static final Set<String> muted = new HashSet<>();
+	
 	private IChannel channel;
 	private BotServer server;
-	
+		
 	private List<String> queue;
 	
 	public DiscordChannel(IChannel channel, BotServer server) {
@@ -57,6 +61,7 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public BotSentMessage sendMessage(String msg) {
+		if(muted.contains(getId())) return null;
 		BotSentMessage bsm = null;
 		try {
 			IMessage im = channel.sendMessage(limit(msg));
@@ -70,6 +75,8 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public BotSentMessage sendError(String error) {
+		if(muted.contains(getId())) return null;
+
 		BotSentMessage bsm = null;
 		try {
 			IMessage im = channel.sendMessage(limit("```Error: \n\n " + error + " ```"));
@@ -83,6 +90,8 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void sendThrowable(Throwable throwable) {
+		if(muted.contains(getId())) return;
+
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		throwable.printStackTrace(pw);
@@ -97,6 +106,8 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public BotSentMessage commitMessage() {
+		if(muted.contains(getId())) return null;
+
 		StringBuilder sb = new StringBuilder();
 		for(String msg : queue)
 			sb.append(msg).append("\n");
@@ -121,4 +132,12 @@ public class DiscordChannel implements BotChannel {
 		return str;
 	}
 
+	public void mute(boolean mute) {
+		if(mute) {
+			muted.add(getId());
+		} else {
+			muted.remove(getId());
+		}
+	}
+	
 }

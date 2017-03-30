@@ -57,6 +57,7 @@ public class DiscordBot extends GenericBot{
 	public void started() {
 		try{ 
 			this.manager = new GenericPermissionManager(this);
+			getCommandHandler().registerCommand(new MuteCommand());
 		} catch(Exception e) {
 			e.printStackTrace();
 			throwable( e);
