@@ -7,6 +7,7 @@ import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 import org.mcsg.bot.api.BotVoiceChannel;
+import org.mcsg.bot.api.PermissionManager;
 import org.mcsg.bot.util.DelayedActionMessage;
 import org.mcsg.bot.util.StringUtils;
 
@@ -19,58 +20,67 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class DiscordBot extends GenericBot{
 
 	private static DiscordBot instance;
-	
+
 	public static DiscordBot get() {
 		return instance;
 	}
-	
+
 	public static void main(String args[]) {
 		instance = new DiscordBot();
 	}
-	
-	
+
+
 	private IDiscordClient client;
 	private Map<IGuild, DiscordVoiceChannel> voices;
-	
+
 	private BotChannel defaultChannel;
-	
-	
+	private PermissionManager manager;
+
+
 	private DiscordBot() {
 		super();
-		ClientBuilder builder = new ClientBuilder();
-		builder.withToken(getSettings().getString("discord.token"));
-		
-		this.voices = new HashMap<>();
-		
-		try {
+		try{
+			ClientBuilder builder = new ClientBuilder();
+			builder.withToken(getSettings().getString("discord.token"));
+
+			this.voices = new HashMap<>();
+
 			client = builder.login();
 			client.getDispatcher().registerListener(new DiscordListener(this.getCommandHandler(), this));
-			
-			
-			
+
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
+
 	}
 	
+	public void started() {
+		try{ 
+			this.manager = new GenericPermissionManager(this);
+		} catch(Exception e) {
+			e.printStackTrace();
+			throwable( e);
+		}
+	}
+
 	public BotVoiceChannel connectVoiceChannel(String id, String chatid) {
 		System.out.println(id + " " + chatid);
 		IVoiceChannel vchannel = client.getVoiceChannelByID(id);
 		DiscordChannel channel = (DiscordChannel)getChat(chatid);
 		DiscordServer server = (DiscordServer) channel.getServer();
-		
+
 		DiscordVoiceChannel voice = new DiscordVoiceChannel(vchannel,channel, server);
-		
+
 		addVoice(vchannel.getGuild(), voice);
-		
+
 		voice.connnect();
-		
+
 		log("Voice", "Connected to #" + channel.getName() + " in server " + server.getName());
-		
-				
+
+
 		return voice;
 	}
-	
+
 	public void addVoice(IGuild guild, DiscordVoiceChannel channel) {
 		this.voices.put(guild, channel);
 	}
@@ -83,7 +93,7 @@ public class DiscordBot extends GenericBot{
 	@Override
 	public BotChannel getChat(String id) {
 		IChannel channel = client.getChannelByID(id);
-		
+
 		return new DiscordChannel(channel, new DiscordServer(channel.getGuild(), this));
 	}
 
@@ -128,14 +138,14 @@ public class DiscordBot extends GenericBot{
 	public void setDefaultChannel(BotChannel botChannel) {
 		this.defaultChannel = botChannel;
 	}
-	
+
 	@Override
 	public BotChannel getDefaultChat() {
 		return defaultChannel;
 	}
 
 	private DelayedActionMessage logger;
-	
+
 	@Override
 	public void log(String log) {
 		getDefaultChat().sendMessage(log);
@@ -145,4 +155,41 @@ public class DiscordBot extends GenericBot{
 	public void log(String prefix, String log) {
 		log("[" + prefix + "] " + log);
 	}
+
+	@Override
+	public PermissionManager getPermissionManager() {
+		return manager;
+	}
+
+	@Override
+	public void err(String prefix, String log) {
+		log("[ERR][" + prefix + "]", log);
+	}
+
+	@Override
+	public void err(String log) {
+		log("[ERR]", log);
+	}
+
+	@Override
+	public void throwable(Throwable t) {
+		getDefaultChat().sendThrowable(t);
+	}
+
+	@Override
+	public String getAdminId() {
+		return getSettings().getString("adminid", null);
+	}
+
+	@Override
+	public void stop() {
+		log("System", "Shutting down...");
+		
+		try{
+			Thread.sleep(1000);
+			System.exit(0);
+		} catch(Exception e){}
+	}
+
+
 }

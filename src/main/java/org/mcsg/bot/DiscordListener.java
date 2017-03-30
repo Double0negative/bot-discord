@@ -41,13 +41,14 @@ public class DiscordListener {
 
 
 	@EventSubscriber
-	public void onReadyEvent(ReadyEvent event) {
+	public void onReadyEvent(ReadyEvent event) {		
 		bot.setDefaultChannel(bot.getChat(bot.getSettings().getString("discord.default-channel")));
 		
+		bot.log("----------------------------------");
 		bot.log("System", "Bot started...");
 		
-		//todo: actually configure what its connecting to somehow
-		
+		bot.started();
+				
 		List<Map> con = bot.getSettings().getList("discord.voice");
 		System.out.println(con.get(0).getClass());
 		

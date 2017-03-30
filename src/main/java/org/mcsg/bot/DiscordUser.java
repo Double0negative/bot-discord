@@ -1,7 +1,12 @@
 package org.mcsg.bot;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -32,6 +37,18 @@ public class DiscordUser implements BotUser{
 		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<String> getGroups(BotServer server) {
+		List<IRole> roles = user.getRolesForGuild(((DiscordServer)server).getHandle());
+		List<String> sroles = new ArrayList<>();
+		
+		for(IRole role : roles) {
+			String str = role.getID();
+			sroles.add(str);
+		}
+		return sroles;
 	}
 	
 	

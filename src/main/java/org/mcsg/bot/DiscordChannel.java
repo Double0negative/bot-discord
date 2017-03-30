@@ -59,7 +59,7 @@ public class DiscordChannel implements BotChannel {
 	public BotSentMessage sendMessage(String msg) {
 		BotSentMessage bsm = null;
 		try {
-			IMessage im = channel.sendMessage(msg);
+			IMessage im = channel.sendMessage(limit(msg));
 			bsm = new DiscordSentMessage(im, (DiscordBot)getServer().getBot());
 		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 			// TODO Auto-generated catch block
@@ -72,7 +72,7 @@ public class DiscordChannel implements BotChannel {
 	public BotSentMessage sendError(String error) {
 		BotSentMessage bsm = null;
 		try {
-			IMessage im = channel.sendMessage("```Error: \n\n " + error + " ```");
+			IMessage im = channel.sendMessage(limit("```Error: \n\n " + error + " ```"));
 			bsm = new DiscordSentMessage(im, (DiscordBot) getServer().getBot());
 		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
 			// TODO Auto-generated catch block
@@ -113,5 +113,12 @@ public class DiscordChannel implements BotChannel {
 		return channel.getName();
 	}
 
+	
+	public String limit(String str) {
+		if(str.length() >= 2000) {
+			return str.substring(0, 1999);
+		}
+		return str;
+	}
 
 }
