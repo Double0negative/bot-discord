@@ -27,16 +27,16 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	private IVoiceChannel channel;
 	private DiscordChannel chat;
 	private DiscordServer server;
-	
+
 	private List<File> queue;
 	private AudioPlayer audio;
-	
+
 	public DiscordVoiceChannel(IVoiceChannel channel,DiscordChannel chat, DiscordServer server) {
 		this.channel = channel;
 		this.server = server;
 		this.queue = new ArrayList<File>();
 	}
-	
+
 	@Override
 	public String getId() {
 		return channel.getID();
@@ -51,7 +51,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	public List<BotUser> getUsers() {
 		List<IUser> users =  channel.getUsersHere();
 		List<BotUser> u = new ArrayList<>();
-		
+
 		for(IUser user : users) {
 			u.add(new DiscordUser(user));
 		}
@@ -65,7 +65,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 
 	@Override
 	public void queueMessage(String msg) {
-		 chat.queueMessage(msg);
+		chat.queueMessage(msg);
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	public void playFile(File file) {
 		if(!channel.isConnected())
 			throw new NotYetConnectedException();
-		
+
 		audio.clear();
 		try {
 			audio.queue(file);
@@ -132,7 +132,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	public void pause() {
 		audio.setPaused(true);
 	}
-	
+
 	public void play() {
 		audio.setPaused(false);
 	}
@@ -146,6 +146,39 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	public String getName() {
 		return channel.getName();
 	}
-	
+
+	@Override
+	public BotUser getUserByName(String name) {
+		BotUser user = getUserByNameExact(name);
+		if(user != null) {
+			return user;
+		}
+		
+		
+		//fuzzy search from bukkit
+		String lowerName = name.toLowerCase(java.util.Locale.ENGLISH);
+		int delta = Integer.MAX_VALUE;
+		for (BotUser player : getUsers()) {
+			if (player.getUsername().toLowerCase(java.util.Locale.ENGLISH).startsWith(lowerName)) {
+				int curDelta = Math.abs(player.getUsername().length() - lowerName.length());
+				if (curDelta < delta) {
+					user = player;
+					delta = curDelta;
+				}
+				if (curDelta == 0) break;
+			}
+		}
+		return user;
+	}
+
+	public BotUser getUserByNameExact(String name) {
+		for(BotUser user : getUsers()) {
+			if(user.getUsername().equalsIgnoreCase(name)) {
+				return user;
+			}
+		}
+		return null;
+	}
+
 
 }

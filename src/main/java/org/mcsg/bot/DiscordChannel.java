@@ -140,4 +140,37 @@ public class DiscordChannel implements BotChannel {
 		}
 	}
 	
+	@Override
+	public BotUser getUserByName(String name) {
+		BotUser user = getUserByNameExact(name);
+		if(user != null) {
+			return user;
+		}
+		
+		
+		//fuzzy search from bukkit
+		String lowerName = name.toLowerCase(java.util.Locale.ENGLISH);
+		int delta = Integer.MAX_VALUE;
+		for (BotUser player : getUsers()) {
+			if (player.getUsername().toLowerCase(java.util.Locale.ENGLISH).startsWith(lowerName)) {
+				int curDelta = Math.abs(player.getUsername().length() - lowerName.length());
+				if (curDelta < delta) {
+					user = player;
+					delta = curDelta;
+				}
+				if (curDelta == 0) break;
+			}
+		}
+		return user;
+	}
+
+	public BotUser getUserByNameExact(String name) {
+		for(BotUser user : getUsers()) {
+			if(user.getUsername().equalsIgnoreCase(name)) {
+				return user;
+			}
+		}
+		return null;
+	}
+	
 }

@@ -1,6 +1,7 @@
 package org.mcsg.bot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.mcsg.bot.api.BotChannel;
@@ -32,6 +33,10 @@ public class DiscordBot extends GenericBot{
 
 	private IDiscordClient client;
 	private Map<IGuild, DiscordVoiceChannel> voices;
+	
+	private Map<String, DiscordServer> servers;
+	private Map<String, DiscordChannel> channels;
+	private Map<String, DiscordUser> users;
 
 	private BotChannel defaultChannel;
 	private PermissionManager manager;
@@ -58,6 +63,8 @@ public class DiscordBot extends GenericBot{
 		try{ 
 			this.manager = new GenericPermissionManager(this);
 			getCommandHandler().registerCommand(new MuteCommand());
+			
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 			throwable( e);
