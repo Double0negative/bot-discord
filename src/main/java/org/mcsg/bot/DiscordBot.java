@@ -1,14 +1,18 @@
 package org.mcsg.bot;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 import org.mcsg.bot.api.BotVoiceChannel;
 import org.mcsg.bot.api.PermissionManager;
+import org.mcsg.bot.plugin.PluginManager;
 import org.mcsg.bot.util.DelayedActionMessage;
 import org.mcsg.bot.util.StringUtils;
 
@@ -17,6 +21,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.util.Image;
 
 public class DiscordBot extends GenericBot{
 
@@ -39,8 +44,9 @@ public class DiscordBot extends GenericBot{
 	private Map<String, DiscordUser> users;
 
 	private BotChannel defaultChannel;
-	private PermissionManager manager;
+	private PermissionManager permissionsManager;
 
+	private PluginManager pluginManager;
 
 	private DiscordBot() {
 		super();
@@ -53,6 +59,7 @@ public class DiscordBot extends GenericBot{
 			client = builder.login();
 			client.getDispatcher().registerListener(new DiscordListener(this.getCommandHandler(), this));
 
+			
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -61,9 +68,13 @@ public class DiscordBot extends GenericBot{
 	
 	public void started() {
 		try{ 
-			this.manager = new GenericPermissionManager(this);
+			this.permissionsManager = new GenericPermissionManager(this);
 			getCommandHandler().registerCommand(new MuteCommand());
-			
+			getCommandHandler().registerCommand(new ClearCommand());
+
+			this.pluginManager = new PluginManager(this);
+			this.pluginManager.load();
+			this.pluginManager.enableAll();
 			
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -156,7 +167,10 @@ public class DiscordBot extends GenericBot{
 
 	@Override
 	public void log(String log) {
-		getDefaultChat().sendMessage(log);
+		if(logger == null) {
+			logger = new DelayedActionMessage(getDefaultChat());
+		}
+		logger = logger.append(log);
 	}
 
 	@Override
@@ -166,7 +180,7 @@ public class DiscordBot extends GenericBot{
 
 	@Override
 	public PermissionManager getPermissionManager() {
-		return manager;
+		return permissionsManager;
 	}
 
 	@Override

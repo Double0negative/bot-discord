@@ -7,6 +7,7 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 
 public class DiscordSentMessage implements BotSentMessage{
 
@@ -42,12 +43,17 @@ public class DiscordSentMessage implements BotSentMessage{
 
 	@Override
 	public void delete() {
-		try {
-			message.delete();
-		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			RequestBuffer.request(() -> {
+				
+					try {
+						message.delete();
+					} catch (MissingPermissionsException | DiscordException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				
+			});
+		
 		
 	}
 

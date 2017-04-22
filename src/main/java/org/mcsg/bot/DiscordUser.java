@@ -51,6 +51,9 @@ public class DiscordUser implements BotUser{
 		return sroles;
 	}
 	
+	public IUser getHandle() {
+		return user;
+	}
 	
 
 }

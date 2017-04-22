@@ -1,37 +1,48 @@
 package org.mcsg.bot;
 
+import java.util.List;
+
 import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotCommand;
+import org.mcsg.bot.api.BotSentMessage;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
-import sx.blah.discord.util.EmbedBuilder;
+public class ClearCommand implements BotCommand{
 
-public class MuteCommand implements BotCommand{
-
+	private static final int DEFAULT_DELETE_COUNT = 10;
+	
 	@Override
 	public void execute(String cmd, BotServer server, BotChannel chat, BotUser user, String[] args, String input)
 			throws Exception {
-		System.out.println(cmd);
-		if(cmd.equalsIgnoreCase("mute")){
-			chat.sendMessage("Muted");
-			((DiscordChannel)chat).mute(true);
-		}else{
-			((DiscordChannel)chat).mute(false);
-			chat.sendMessage("Unmuted");
+		List<BotSentMessage> msgs = chat.getMessages();
+		
+		int amt = DEFAULT_DELETE_COUNT;
+		if(args.length == 1) {
+			int a = Integer.parseInt(args[0]);
+			if(a == -1) {
+				amt = msgs.size();
+			} else {
+				amt = a;
+			}
 		}
-	
+		
+		for(int i = 0; i < amt; i++) {
+			BotSentMessage msg = msgs.get(i);
+			msg.delete();
+			
+		}
+		
 	}
 
 	@Override
 	public String getPermission() {
-		return "mute";
+		return "clear";
 	}
-
 
 	@Override
 	public String[] getCommand() {
-		return a("mute", "unmute");
+		return a("clear");
 	}
 
 	@Override

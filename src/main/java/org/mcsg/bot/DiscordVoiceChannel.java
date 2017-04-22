@@ -180,5 +180,15 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 		return null;
 	}
 
+	@Override
+	public void clear() {
+		chat.clear();
+	}
+
+	@Override
+	public List<BotSentMessage> getMessages() {
+		return chat.getMessages();
+	}
+
 
 }

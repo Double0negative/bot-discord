@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,29 +15,33 @@ import org.mcsg.bot.api.BotSentMessage;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.impl.obj.Embed;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 
 public class DiscordChannel implements BotChannel {
 
 	private static final Set<String> muted = new HashSet<>();
-	
+
 	private IChannel channel;
 	private BotServer server;
-		
+
 	private List<String> queue;
-	
+
 	public DiscordChannel(IChannel channel, BotServer server) {
 		this.channel = channel;
 		this.server = server;
-		
+
 		this.queue = new ArrayList<>();
 	}
-	
+
 	@Override
 	public String getId() {
 		return channel.getID();
@@ -46,13 +51,13 @@ public class DiscordChannel implements BotChannel {
 	public List<BotUser> getUsers() {
 		List<IUser> users =  channel.getUsersHere();
 		List<BotUser> u = new ArrayList<>();
-		
+
 		for(IUser user : users) {
 			u.add(new DiscordUser(user));
 		}
 		return u;
 	}
-	
+
 
 	@Override
 	public BotServer getServer() {
@@ -95,7 +100,7 @@ public class DiscordChannel implements BotChannel {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		throwable.printStackTrace(pw);
-		 // stack trace as a string
+		// stack trace as a string
 		this.sendError(sw.toString());
 	}
 
@@ -116,7 +121,7 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void sendFile(File file) throws Exception{
-			channel.sendFile(file);
+		channel.sendFile(file);
 	}
 
 	@Override
@@ -124,7 +129,7 @@ public class DiscordChannel implements BotChannel {
 		return channel.getName();
 	}
 
-	
+
 	public String limit(String str) {
 		if(str.length() >= 2000) {
 			return str.substring(0, 1999);
@@ -139,15 +144,15 @@ public class DiscordChannel implements BotChannel {
 			muted.remove(getId());
 		}
 	}
-	
+
 	@Override
 	public BotUser getUserByName(String name) {
 		BotUser user = getUserByNameExact(name);
 		if(user != null) {
 			return user;
 		}
-		
-		
+
+
 		//fuzzy search from bukkit
 		String lowerName = name.toLowerCase(java.util.Locale.ENGLISH);
 		int delta = Integer.MAX_VALUE;
@@ -172,5 +177,34 @@ public class DiscordChannel implements BotChannel {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public void clear() {
+		for(IMessage msg : channel.getMessages().toArray(new IMessage[0])) {
+			RequestBuffer.request(() -> {try {
+				msg.delete();
+			} catch (MissingPermissionsException | DiscordException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} });
+
+		} 
+	}
+
+	public DiscordSentMessage sendMessage(EmbedObject obj) {
+		//channel.sendMessage(null, obj);
+		return null;
+	}
+
+	@Override
+	public List<BotSentMessage> getMessages() {
+		List<BotSentMessage> messages = new ArrayList<>();
+
+		for(IMessage msg : channel.getMessages()) {
+			messages.add(new DiscordSentMessage(msg, (DiscordBot) getServer().getBot()));
+		}
+		return messages;
+	}
+
+
 }

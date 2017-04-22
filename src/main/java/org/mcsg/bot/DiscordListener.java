@@ -20,6 +20,7 @@ import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.UserJoinEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -58,6 +59,8 @@ public class DiscordListener {
 	
 
 	}
+	
+	
 
 	@EventSubscriber
 	public void onMessageReceivedEvent(MessageReceivedEvent event) { 	
