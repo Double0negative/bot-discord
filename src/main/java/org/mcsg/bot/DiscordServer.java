@@ -1,5 +1,6 @@
 package org.mcsg.bot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.mcsg.bot.api.Bot;
@@ -8,6 +9,7 @@ import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 public class DiscordServer implements BotServer {
 
@@ -28,10 +30,45 @@ public class DiscordServer implements BotServer {
 
 	@Override
 	public List<BotUser> getUsers() {
-		// TODO Auto-generated method stub
-		return null;
+		List<BotUser> users = new ArrayList<>();
+		for(IUser user : guild.getUsers()) {
+			users.add(new DiscordUser(user));
+		}
+		return users;
 	}
 
+	@Override
+	public BotUser getUserByName(String name) {
+		BotUser user = getUserByNameExact(name);
+		if(user != null) {
+			return user;
+		}
+
+
+		//fuzzy search from bukkit
+		String lowerName = name.toLowerCase(java.util.Locale.ENGLISH);
+		int delta = Integer.MAX_VALUE;
+		for (BotUser player : getUsers()) {
+			if (player.getUsername().toLowerCase(java.util.Locale.ENGLISH).startsWith(lowerName)) {
+				int curDelta = Math.abs(player.getUsername().length() - lowerName.length());
+				if (curDelta < delta) {
+					user = player;
+					delta = curDelta;
+				}
+				if (curDelta == 0) break;
+			}
+		}
+		return user;
+	}
+
+	public BotUser getUserByNameExact(String name) {
+		for(BotUser user : getUsers()) {
+			if(user.getUsername().equalsIgnoreCase(name)) {
+				return user;
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public Bot getBot() {

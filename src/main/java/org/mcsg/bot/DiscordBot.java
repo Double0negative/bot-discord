@@ -16,6 +16,10 @@ import org.mcsg.bot.plugin.PluginManager;
 import org.mcsg.bot.util.DelayedActionMessage;
 import org.mcsg.bot.util.StringUtils;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
@@ -45,7 +49,7 @@ public class DiscordBot extends GenericBot{
 
 	private BotChannel defaultChannel;
 	private PermissionManager permissionsManager;
-
+	private AudioPlayerManager audioManager;
 	private PluginManager pluginManager;
 
 	private DiscordBot() {
@@ -68,6 +72,11 @@ public class DiscordBot extends GenericBot{
 	
 	public void started() {
 		try{ 
+			audioManager = new DefaultAudioPlayerManager();
+			
+			AudioSourceManagers.registerRemoteSources(audioManager);
+			AudioSourceManagers.registerLocalSource(audioManager);
+			
 			this.permissionsManager = new GenericPermissionManager(this);
 			getCommandHandler().registerCommand(new MuteCommand());
 			getCommandHandler().registerCommand(new ClearCommand());
@@ -88,7 +97,7 @@ public class DiscordBot extends GenericBot{
 		DiscordChannel channel = (DiscordChannel)getChat(chatid);
 		DiscordServer server = (DiscordServer) channel.getServer();
 
-		DiscordVoiceChannel voice = new DiscordVoiceChannel(vchannel,channel, server);
+		DiscordVoiceChannel voice = new DiscordVoiceChannel(vchannel,channel, server, audioManager);
 
 		addVoice(vchannel.getGuild(), voice);
 

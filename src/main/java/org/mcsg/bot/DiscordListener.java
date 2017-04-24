@@ -51,7 +51,6 @@ public class DiscordListener {
 		bot.started();
 				
 		List<Map> con = bot.getSettings().getList("discord.voice");
-		System.out.println(con.get(0).getClass());
 		
 		for(Map<String, String> values : con) {
 			bot.connectVoiceChannel(values.get("voice"), values.get("chat"));
@@ -76,5 +75,7 @@ public class DiscordListener {
 
 		handler.executeCommand(msg, chat, user);
 	}
+	
+
 
 }
