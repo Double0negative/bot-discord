@@ -180,15 +180,7 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void clear() {
-		for(IMessage msg : channel.getMessages().toArray(new IMessage[0])) {
-			RequestBuffer.request(() -> {try {
-				msg.delete();
-			} catch (MissingPermissionsException | DiscordException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} });
-
-		} 
+		channel.bulkDelete();
 	}
 
 	public DiscordSentMessage sendMessage(EmbedObject obj) {
@@ -200,7 +192,7 @@ public class DiscordChannel implements BotChannel {
 	public List<BotSentMessage> getMessages() {
 		List<BotSentMessage> messages = new ArrayList<>();
 
-		for(IMessage msg : channel.getMessages()) {
+		for(IMessage msg : channel.getMessageHistory()) {
 			messages.add(new DiscordSentMessage(msg, (DiscordBot) getServer().getBot()));
 		}
 		return messages;
