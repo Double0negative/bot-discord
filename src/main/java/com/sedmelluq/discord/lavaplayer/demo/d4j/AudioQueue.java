@@ -52,6 +52,8 @@ public class AudioQueue extends AudioEventAdapter {
 		if(track != null) {
 			player.startTrack(track, false);
 			chat.sendMessage("Playing " + track.getInfo().title);
+		} else {
+			player.stopTrack();
 		}
 	}
 
