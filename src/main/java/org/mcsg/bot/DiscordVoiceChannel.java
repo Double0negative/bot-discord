@@ -123,7 +123,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	}
 	
 	private void setupAudio() {
-		this.queue = new AudioQueue(player);
+		this.queue = new AudioQueue(player, chat);
 		this.player.addListener(this.queue);
 	}
 
@@ -201,20 +201,22 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 
 	@Override
 	public void play(String query) {
-		System.out.println("Playing");
-		Future<Void> future = manager.loadItem("ytsearch: "+ query, new AudioLoadResultHandler() {
+		String queryString = "ytsearch: " + query;
+		
+		if(query.contains("http")) {
+			queryString = query;
+		}
+		
+		Future<Void> future = manager.loadItem(queryString, new AudioLoadResultHandler() {
 			
 			@Override
 			public void trackLoaded(AudioTrack track) {
 				queue.queue(track);
-				chat.sendMessage("Playing " + track.getInfo().title);
 			}
 			
 			@Override
 			public void playlistLoaded(AudioPlaylist list) {
 				queue.queue(list.getTracks().get(0));
-				chat.sendMessage("Queued " + list.getTracks().get(0).getInfo().title);
-
 			}
 			
 			@Override
@@ -230,14 +232,6 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 				chat.sendMessage("Could not play " + query + ". And error occured while loading the track.");
 			}
 		});
-		try {
-			future.get(5000, TimeUnit.DAYS);
-			System.out.println("FUTURE RETURNED");
-
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 

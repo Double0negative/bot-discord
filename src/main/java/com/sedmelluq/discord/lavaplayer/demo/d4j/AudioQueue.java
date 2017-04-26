@@ -3,6 +3,8 @@ package com.sedmelluq.discord.lavaplayer.demo.d4j;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.mcsg.bot.api.BotChannel;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -12,12 +14,15 @@ public class AudioQueue extends AudioEventAdapter {
 	private final AudioPlayer player;
 	private final BlockingQueue<AudioTrack> queue;
 
+	private BotChannel chat; 
+
 	/**
 	 * @param player The audio player this scheduler uses
 	 */
-	public AudioQueue(AudioPlayer player) {
+	public AudioQueue(AudioPlayer player, BotChannel chat) {
 		this.player = player;
 		this.queue = new LinkedBlockingQueue<>();
+		this.chat = chat;
 	}
 
 	/**
@@ -30,7 +35,10 @@ public class AudioQueue extends AudioEventAdapter {
 		// something is playing, it returns false and does nothing. In that case the player was already playing so this
 		// track goes to the queue instead.
 		if (!player.startTrack(track, true)) {
+			chat.sendMessage("Queued " + track.getInfo().title);
 			queue.offer(track);
+		} else {
+			chat.sendMessage("Playing " + track.getInfo().title);
 		}
 	}
 
@@ -40,7 +48,11 @@ public class AudioQueue extends AudioEventAdapter {
 	public void nextTrack() {
 		// Start the next track, regardless of if something is already playing or not. In case queue was empty, we are
 		// giving null to startTrack, which is a valid argument and will simply stop the player.
-		player.startTrack(queue.poll(), false);
+		AudioTrack track = queue.poll();
+		if(track != null) {
+			player.startTrack(track, false);
+			chat.sendMessage("Playing " + track.getInfo().title);
+		}
 	}
 
 	@Override
@@ -51,7 +63,7 @@ public class AudioQueue extends AudioEventAdapter {
 			nextTrack();
 		}
 	}
-	
+
 	public void onPlaylistEnd(Runnable callback) {
 		callback.run();
 	}
