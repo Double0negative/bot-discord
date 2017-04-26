@@ -51,20 +51,13 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	private AudioPlayer player;
 	private AudioProvider provider;
 	
-	private String activePlaylist;
-	
-	//Queues == playlist. queue.get(DEFAULT_QUEUE) = none-playlist queue
-	private Map<String, AudioQueue> playlists;
+	private AudioQueue queue;
 
 	public DiscordVoiceChannel(IVoiceChannel channel,DiscordChannel chat, DiscordServer server, AudioPlayerManager manager) {
 		this.channel = channel;
 		this.server = server;
 		this.chat = chat;
 		this.manager = manager;
-		this.playlists = new HashMap<>();
-		this.setActivePlaylist(DEFAULT_QUEUE);
-		this.activePlaylist = DEFAULT_QUEUE;
-
 	}
 
 	@Override
@@ -123,32 +116,17 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 			
 			server.getHandle().getAudioManager().setAudioProvider(provider);
 			
-			this.playlists.put(DEFAULT_QUEUE, new AudioQueue(player));
+			setupAudio();
 		} catch (MissingPermissionsException | DiscordException | RateLimitException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void setActivePlaylist(String playlist) {
-		AudioQueue current = this.playlists.get(activePlaylist);
-		AudioQueue queue = this.playlists.get(playlist);
-		
-		if(queue != null) {
-			this.activePlaylist = playlist;
-			this.player.removeListener(current);
-			this.player.addListener(queue);
-		
-			//stop current playing 
-			this.player.stopTrack();
-			
-			//start new queue
-			queue.nextTrack();
-		}
+	private void setupAudio() {
+		this.queue = new AudioQueue(player);
+		this.player.addListener(this.queue);
 	}
 
-	private AudioQueue getActivePlaylist() {
-		return this.playlists.get(activePlaylist);
-	}
 	
 	@Override
 	public void disconnect() {
@@ -156,7 +134,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	}
 	@Override
 	public void skip() {
-		this.getActivePlaylist().nextTrack();
+		queue.nextTrack();
 	}
 
 	@Override
@@ -228,14 +206,14 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 			
 			@Override
 			public void trackLoaded(AudioTrack track) {
-				playlists.get(DEFAULT_QUEUE).queue(track);
+				queue.queue(track);
 				chat.sendMessage("Playing " + track.getInfo().title);
 			}
 			
 			@Override
 			public void playlistLoaded(AudioPlaylist list) {
-				playlists.get(DEFAULT_QUEUE).queue(list.getTracks().get(0));
-				chat.sendMessage("Playing " + list.getTracks().get(0).getInfo().title);
+				queue.queue(list.getTracks().get(0));
+				chat.sendMessage("Queued " + list.getTracks().get(0).getInfo().title);
 
 			}
 			
