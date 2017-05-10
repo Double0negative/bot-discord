@@ -78,6 +78,12 @@ public class DiscordChannel implements BotChannel {
 		return bsm;
 	}
 
+	public void sendMessageBuffered(String msg) {
+		RequestBuffer.request(() -> {
+			channel.sendMessage(msg);
+		}).get();
+	}
+
 	@Override
 	public BotSentMessage sendError(String error) {
 		if(muted.contains(getId())) return null;
@@ -180,7 +186,11 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void clear() {
-		channel.bulkDelete();
+		try{
+			channel.bulkDelete();
+		}catch (Exception e){
+			e.printStackTrace();;
+		}
 	}
 
 	public DiscordSentMessage sendMessage(EmbedObject obj) {
@@ -196,6 +206,10 @@ public class DiscordChannel implements BotChannel {
 			messages.add(new DiscordSentMessage(msg, (DiscordBot) getServer().getBot()));
 		}
 		return messages;
+	}
+	
+	public IChannel getHandle() {
+		return channel;
 	}
 
 

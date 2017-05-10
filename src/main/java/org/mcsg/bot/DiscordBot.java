@@ -12,6 +12,8 @@ import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 import org.mcsg.bot.api.BotVoiceChannel;
 import org.mcsg.bot.api.PermissionManager;
+import org.mcsg.bot.commands.MuteCommand;
+import org.mcsg.bot.commands.WeatherCommand;
 import org.mcsg.bot.plugin.PluginManager;
 import org.mcsg.bot.util.DelayedActionMessage;
 import org.mcsg.bot.util.StringUtils;
@@ -24,6 +26,7 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.Image;
 
@@ -42,7 +45,7 @@ public class DiscordBot extends GenericBot{
 
 	private IDiscordClient client;
 	private Map<IGuild, DiscordVoiceChannel> voices;
-	
+
 	private Map<String, DiscordServer> servers;
 	private Map<String, DiscordChannel> channels;
 	private Map<String, DiscordUser> users;
@@ -63,28 +66,29 @@ public class DiscordBot extends GenericBot{
 			client = builder.login();
 			client.getDispatcher().registerListener(new DiscordListener(this.getCommandHandler(), this));
 
-			
+
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	public void started() {
 		try{ 
 			audioManager = new DefaultAudioPlayerManager();
-			
+
 			AudioSourceManagers.registerRemoteSources(audioManager);
 			AudioSourceManagers.registerLocalSource(audioManager);
-			
+
 			this.permissionsManager = new GenericPermissionManager(this);
 			getCommandHandler().registerCommand(new MuteCommand());
 			getCommandHandler().registerCommand(new ClearCommand());
+			getCommandHandler().registerCommand(new WeatherCommand());
 
 			this.pluginManager = new PluginManager(this);
 			this.pluginManager.load();
 			this.pluginManager.enableAll();
-			
+
 		} catch(Exception e) {
 			e.printStackTrace();
 			throwable( e);
@@ -115,7 +119,11 @@ public class DiscordBot extends GenericBot{
 
 	@Override
 	public BotUser getUser(String id) {
-		return new DiscordUser(client.getUserByID(id));
+		IUser user = client.getUserByID(id);
+		if(user == null) 
+			return null;
+		else
+			return new DiscordUser(user);
 	}
 
 	@Override
@@ -215,12 +223,19 @@ public class DiscordBot extends GenericBot{
 	@Override
 	public void stop() {
 		log("System", "Shutting down...");
-		
+
 		try{
 			Thread.sleep(1000);
 			System.exit(0);
 		} catch(Exception e){}
 	}
+
+	@Override
+	public void setStatus(String status) {
+		client.changePlayingText(status);
+	}
+
+
 
 
 }

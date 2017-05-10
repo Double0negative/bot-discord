@@ -123,7 +123,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	}
 	
 	private void setupAudio() {
-		this.queue = new AudioQueue(player, chat);
+		this.queue = new AudioQueue(server.getBot(), player, chat);
 		this.player.addListener(this.queue);
 	}
 

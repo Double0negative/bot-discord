@@ -25,6 +25,7 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.Image;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
@@ -72,6 +73,16 @@ public class DiscordListener {
 		DiscordChannel chat = new DiscordChannel(channel, server);
 
 		DiscordUser user = new DiscordUser(event.getMessage().getAuthor());
+//		
+//		EmbedBuilder builder = new EmbedBuilder();
+//		builder.withColor(Color.GREEN);
+//		builder.withTitle("Test");
+//		builder.appendField("test", "test", true);
+//		builder.appendField("test", "test", true);
+//		builder.appendField("test", "test", true);
+//
+//		builder.withImage("http://i.imgur.com/naVkaEt.jpg");
+//		channel.sendMessage(builder.build());
 
 		handler.executeCommand(msg, chat, user);
 	}

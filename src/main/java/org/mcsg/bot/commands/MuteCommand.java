@@ -1,5 +1,6 @@
-package org.mcsg.bot;
+package org.mcsg.bot.commands;
 
+import org.mcsg.bot.DiscordChannel;
 import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotCommand;
 import org.mcsg.bot.api.BotServer;
