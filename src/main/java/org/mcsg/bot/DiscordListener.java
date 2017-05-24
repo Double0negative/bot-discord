@@ -20,9 +20,10 @@ import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.audio.IAudioManager;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.UserJoinEvent;
+import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
@@ -45,22 +46,38 @@ public class DiscordListener {
 	@EventSubscriber
 	public void onReadyEvent(ReadyEvent event) {		
 		bot.setDefaultChannel(bot.getChat(bot.getSettings().getString("discord.default-channel")));
-		
+
 		bot.log("----------------------------------");
 		bot.log("System", "Bot started...");
-		
+
 		bot.started();
-				
+
 		List<Map> con = bot.getSettings().getList("discord.voice");
-		
+
 		for(Map<String, String> values : con) {
 			bot.connectVoiceChannel(values.get("voice"), values.get("chat"));
 		}
-	
+
 
 	}
-	
-	
+
+	@EventSubscriber
+	public void onJoin(UserJoinEvent e) {
+		IGuild guild = e.getGuild();
+		IUser user = e.getUser();
+
+		String id = bot.getSettings().getString("discord.joinmessage." + guild.getID());
+		if(id != null) {
+			BotChannel chat = bot.getChat(id);
+
+			if(chat != null) {
+				chat.sendMessage("Welcome " + user.mention() + " to the discord!");
+			}
+
+		}
+	}
+
+
 
 	@EventSubscriber
 	public void onMessageReceivedEvent(MessageReceivedEvent event) { 	
@@ -73,20 +90,20 @@ public class DiscordListener {
 		DiscordChannel chat = new DiscordChannel(channel, server);
 
 		DiscordUser user = new DiscordUser(event.getMessage().getAuthor());
-//		
-//		EmbedBuilder builder = new EmbedBuilder();
-//		builder.withColor(Color.GREEN);
-//		builder.withTitle("Test");
-//		builder.appendField("test", "test", true);
-//		builder.appendField("test", "test", true);
-//		builder.appendField("test", "test", true);
-//
-//		builder.withImage("http://i.imgur.com/naVkaEt.jpg");
-//		channel.sendMessage(builder.build());
+		//		
+		//		EmbedBuilder builder = new EmbedBuilder();
+		//		builder.withColor(Color.GREEN);
+		//		builder.withTitle("Test");
+		//		builder.appendField("test", "test", true);
+		//		builder.appendField("test", "test", true);
+		//		builder.appendField("test", "test", true);
+		//
+		//		builder.withImage("http://i.imgur.com/naVkaEt.jpg");
+		//		channel.sendMessage(builder.build());
 
 		handler.executeCommand(msg, chat, user);
 	}
-	
+
 
 
 }

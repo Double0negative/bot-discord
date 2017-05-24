@@ -20,9 +20,9 @@ import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 import org.mcsg.bot.api.BotVoiceChannel;
 import org.mcsg.bot.audio.TrackInfo;
+import org.mcsg.bot.music.AudioQueue;
 
 import com.sedmelluq.discord.lavaplayer.demo.d4j.AudioProvider;
-import com.sedmelluq.discord.lavaplayer.demo.d4j.AudioQueue;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;

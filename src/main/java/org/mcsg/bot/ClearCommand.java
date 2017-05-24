@@ -15,7 +15,14 @@ public class ClearCommand implements BotCommand{
 	@Override
 	public void execute(String cmd, BotServer server, BotChannel chat, BotUser user, String[] args, String input)
 			throws Exception {
+		
+		if(args.length == 1 && args[0].equalsIgnoreCase("all")) {
+			chat.clear();
+		}
+		
 		List<BotSentMessage> msgs = chat.getMessages();
+		
+		
 		
 		int amt = DEFAULT_DELETE_COUNT;
 		if(args.length == 1) {

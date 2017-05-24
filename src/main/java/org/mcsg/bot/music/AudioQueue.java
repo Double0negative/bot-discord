@@ -1,4 +1,4 @@
-package com.sedmelluq.discord.lavaplayer.demo.d4j;
+package org.mcsg.bot.music;
 
 import java.awt.Color;
 import java.util.concurrent.BlockingQueue;
@@ -20,7 +20,8 @@ import sx.blah.discord.util.EmbedBuilder;
 public class AudioQueue extends AudioEventAdapter {
 	private final AudioPlayer player;
 	private final BlockingQueue<AudioTrack> queue;
-
+//	private final AudioTrack filler;
+	
 	private DiscordChannel chat; 
 	private Bot bot;
 
@@ -32,6 +33,7 @@ public class AudioQueue extends AudioEventAdapter {
 		this.queue = new LinkedBlockingQueue<>();
 		this.chat = (DiscordChannel)chat;
 		this.bot = bot;
+		//this.filler = filler;
 	}
 
 	/**
@@ -50,7 +52,7 @@ public class AudioQueue extends AudioEventAdapter {
 		String title = "";
 		if (!player.startTrack(track, true)) {
 			queue.offer(track);
-			title  =  "Position " + queue.size() + " in queue";
+			title  =  "#" + queue.size() + " in queue";
 			builder.withColor(Color.decode("#ffbb00"));
 		} else {
 			builder.withColor(Color.GREEN);
@@ -90,6 +92,7 @@ public class AudioQueue extends AudioEventAdapter {
 		} else {
 			bot.setStatus("Some wall riding beats");
 			player.stopTrack();
+			//player.startTrack(filler, true)
 		}
 	}
 

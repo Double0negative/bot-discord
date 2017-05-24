@@ -83,6 +83,12 @@ public class DiscordChannel implements BotChannel {
 			channel.sendMessage(msg);
 		}).get();
 	}
+	
+	public void sendMessage(EmbedObject obj) {
+		RequestBuffer.request(() -> {
+			channel.sendMessage(obj);
+		}).get();
+	}
 
 	@Override
 	public BotSentMessage sendError(String error) {
@@ -191,11 +197,6 @@ public class DiscordChannel implements BotChannel {
 		}catch (Exception e){
 			e.printStackTrace();;
 		}
-	}
-
-	public DiscordSentMessage sendMessage(EmbedObject obj) {
-		//channel.sendMessage(null, obj);
-		return null;
 	}
 
 	@Override
