@@ -87,7 +87,7 @@
 	</build>
 	<repositories>
 
-		<repository> <!-- This repo fixes issues with transitive dependencies -->
+		<repository> 
 			<id>jcenter</id>
 			<url>http://jcenter.bintray.com</url>
 		</repository>

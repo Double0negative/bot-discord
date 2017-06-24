@@ -11,6 +11,7 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 
 public class DiscordUser implements BotUser{
 
@@ -51,6 +52,17 @@ public class DiscordUser implements BotUser{
 		return sroles;
 	}
 	
+	public void removeRole(IRole role) {
+		RequestBuffer.request(() -> {
+			user.removeRole(role);
+		});
+	}
+	
+	public void addRole(IRole role) {
+		RequestBuffer.request(() -> {
+			user.addRole(role);
+		});
+	}
 	public IUser getHandle() {
 		return user;
 	}

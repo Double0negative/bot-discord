@@ -83,10 +83,15 @@ public class DiscordChannel implements BotChannel {
 			channel.sendMessage(msg);
 		}).get();
 	}
-	
+
 	public void sendMessage(EmbedObject obj) {
 		RequestBuffer.request(() -> {
-			channel.sendMessage(obj);
+			try{
+				channel.sendMessage(obj);
+			} catch(RateLimitException e) {
+				System.out.println("Retry Delay:" + e.getRetryDelay());
+				throw e;
+			}
 		}).get();
 	}
 
@@ -208,7 +213,7 @@ public class DiscordChannel implements BotChannel {
 		}
 		return messages;
 	}
-	
+
 	public IChannel getHandle() {
 		return channel;
 	}
