@@ -86,6 +86,7 @@ public class AudioQueue extends AudioEventAdapter {
 		// giving null to startTrack, which is a valid argument and will simply stop the player.
 		AudioTrack track = queue.poll();
 		if(track != null) {
+			player.setVolume(50);
 			player.startTrack(track, false);
 			//chat.sendMessage("Playing " + track.getInfo().title);
 			bot.setStatus(track.getInfo().title);
