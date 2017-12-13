@@ -1,6 +1,6 @@
 package org.mcsg.bot.commands
 
-import java.awt.Color
+import static java.awt.Color.GREEN
 
 import org.mcsg.bot.DiscordChannel
 import org.mcsg.bot.api.BotChannel
@@ -12,7 +12,7 @@ import org.mcsg.bot.util.StringUtils
 import groovy.json.JsonSlurper
 import sx.blah.discord.util.EmbedBuilder
 
-class WeatherCommand implements BotCommand{
+class WeatherCommand implements BotCommand {
 
 	private static final String CURRENT = "http://api.wunderground.com/api/{0}/conditions/q/{1}.json"
 	private static final String HOURLY = "http://api.wunderground.com/api/{0}/hourly/q/{1}.json"
@@ -21,89 +21,61 @@ class WeatherCommand implements BotCommand{
 
 	private JsonSlurper slurp = new JsonSlurper()
 
-
-
 	@Override
-	public void execute(String cmd, BotServer server, BotChannel chat, BotUser user, String[] args, String input)
+	void execute(String cmd, BotServer server, BotChannel chat, BotUser user, String[] args, String input)
 	throws Exception {
-		def key = server.getBot().getSettings().get("wunderground.apikey")
-		current(chat, key, input);
+		def key = server.bot.settings.get "wunderground.apikey"
+		current((DiscordChannel) chat, key, input)
 	}
 
 
-	def current(chat, key, query) {
-		def dchat = chat as DiscordChannel
-
+	def current(DiscordChannel dchat, key, query) {
 		def url = StringUtils.replaceVars(CURRENT, key, query)
 		def json = slurp.parse(new URL(url))
 
-
-		def radarurl = StringUtils.replaceVars(RADAR, key, query)
-		if(json && json.current_observation) {
-			try{
+		def radarUrl = StringUtils.replaceVars(RADAR, key, query)
+		if (json && json.current_observation) {
+			try {
 				def current = json.current_observation
 
-				EmbedBuilder builder = new EmbedBuilder()
-				builder.withColor(Color.GREEN)
-				builder.withAuthorName("Current Conditions")
-				builder.withTitle(current.display_location.full)
-				
-				builder.withThumbnail(current.icon_url)
-
-				builder.appendField("Conditions", "**${current.weather}**", true)
-				builder.appendField("Tempature", "Real: **${current.temperature_string}** \nfeels: **${current.feelslike_string}**", true)
-				builder.appendField("Wind", "**${current.wind_string}**", false)
-
-				builder.withImage(radarurl)
-
-				dchat.getHandle().sendMessage(builder.build())
-			}catch(e) {
+				dchat.handle.sendMessage new EmbedBuilder().with {
+					withColor GREEN
+					withAuthorName "Current Conditions"
+					withTitle current.display_location.full
+					
+					withThumbnail current.icon_url
+					
+					appendField "Conditions", "**$current.weather**", true
+					appendField "Temperature", "Real: **$current.temperature_string**\nFeels: **$current.feelslike_string**", true
+					appendField "Wind", "**$current.wind_string**", false
+					
+					withImage radarUrl
+				}
+			} catch (e) {
 				e.printStackTrace()
 			}
 		}
-
-
 	}
 
 	def radar(BotChannel chat, key, query) {
 		def url = StringUtils.replaceVars(RADAR, key, query)
-		File file = new File("${url.tokenize('/')[-1]}.gif");
+		File file = new File("${url[url.lastIndexOf('/')..-1]}.gif")
 		file.withOutputStream { out ->
 			out << new URL(url).openStream()
 		}
 
-		chat.sendFile(file);
+		chat.sendFile(file)
 	}
-
-
 
 	@Override
-	public String getPermission() {
-		"weather"
-	}
-
-
+	String getPermission() { "weather" }
 
 	@Override
-	public String[] getCommand() {
-		["weather", "w"]
-	}
-
-
+	String[] getCommand() { ["weather", "w"] }
 
 	@Override
-	public String getHelp() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
+	String getHelp() { null }
 
 	@Override
-	public String getUsage() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
+	String getUsage() { null }
 }
