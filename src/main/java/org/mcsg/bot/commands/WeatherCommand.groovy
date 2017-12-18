@@ -34,26 +34,26 @@ class WeatherCommand implements BotCommand {
 		def json = slurp.parse(new URL(url))
 
 		def radarUrl = StringUtils.replaceVars(RADAR, key, query)
-		if (json && json.current_observation) {
-			try {
-				def current = json.current_observation
+		if (!json || !json.current_observation) return
 
-				dchat.handle.sendMessage new EmbedBuilder().with {
-					withColor GREEN
-					withAuthorName "Current Conditions"
-					withTitle current.display_location.full
-					
-					withThumbnail current.icon_url
-					
-					appendField "Conditions", "**$current.weather**", true
-					appendField "Temperature", "Real: **$current.temperature_string**\nFeels: **$current.feelslike_string**", true
-					appendField "Wind", "**$current.wind_string**", false
-					
-					withImage radarUrl
-				}
-			} catch (e) {
-				e.printStackTrace()
+		try {
+			def current = json.current_observation
+
+			dchat.handle.sendMessage new EmbedBuilder().with {
+				withColor GREEN
+				withAuthorName "Current Conditions"
+				withTitle current.display_location.full
+
+				withThumbnail current.icon_url
+
+				appendField "Conditions", "**$current.weather**", true
+				appendField "Temperature", "Real: **$current.temperature_string**\nFeels: **$current.feelslike_string**", true
+				appendField "Wind", "**$current.wind_string**", false
+
+				withImage radarUrl
 			}
+		} catch (e) {
+			e.printStackTrace()
 		}
 	}
 
