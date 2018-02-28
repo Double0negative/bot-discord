@@ -44,7 +44,7 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public String getId() {
-		return channel.getID();
+		return channel.getStringID();
 	}
 
 	@Override
@@ -138,7 +138,13 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void sendFile(File file) throws Exception{
-		channel.sendFile(file);
+		RequestBuffer.request(() -> {
+			try {
+				channel.sendFile(file);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	@Override
@@ -216,6 +222,17 @@ public class DiscordChannel implements BotChannel {
 
 	public IChannel getHandle() {
 		return channel;
+	}
+
+	@Override
+	public BotSentMessage debug(String msg) {
+		System.out.println("DEUBG" + server.getBot().getSettings().getBoolean("bot.debug", false));
+
+		if(server.getBot().getSettings().getBoolean("bot.debug", false)) {
+			return sendMessage(msg);
+		} else {
+			return null;
+		}
 	}
 
 

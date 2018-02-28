@@ -21,7 +21,7 @@
 		<finalName>bot-discord</finalName>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 		<plugins>
-						<plugin>
+			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.2</version>
 				<configuration>
@@ -106,12 +106,12 @@
 		<dependency>
 			<groupId>com.sedmelluq</groupId>
 			<artifactId>lavaplayer</artifactId>
-			<version>1.2.42</version>
+			<version>1.2.45</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4j</artifactId>
-			<version>9a5d23f</version>
+			<version>49a6f26</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mcsg</groupId>

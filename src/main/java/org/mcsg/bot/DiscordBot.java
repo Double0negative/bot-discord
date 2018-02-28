@@ -1,6 +1,8 @@
 package org.mcsg.bot;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,9 @@ public class DiscordBot extends GenericBot{
 	private PermissionManager permissionsManager;
 	private AudioPlayerManager audioManager;
 	private PluginManager pluginManager;
+	
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 
 	private DiscordBot() {
 		super();
@@ -97,7 +102,7 @@ public class DiscordBot extends GenericBot{
 
 	public BotVoiceChannel connectVoiceChannel(String id, String chatid) {
 		System.out.println(id + " " + chatid);
-		IVoiceChannel vchannel = client.getVoiceChannelByID(id);
+		IVoiceChannel vchannel = client.getVoiceChannelByID(parseLong(id));
 		DiscordChannel channel = (DiscordChannel)getChat(chatid);
 		DiscordServer server = (DiscordServer) channel.getServer();
 
@@ -119,7 +124,7 @@ public class DiscordBot extends GenericBot{
 
 	@Override
 	public BotUser getUser(String id) {
-		IUser user = client.getUserByID(id);
+		IUser user = client.getUserByID(parseLong(id));
 		if(user == null) 
 			return null;
 		else
@@ -128,16 +133,20 @@ public class DiscordBot extends GenericBot{
 
 	@Override
 	public BotChannel getChat(String id) {
-		IChannel channel = client.getChannelByID(id);
+		IChannel channel = client.getChannelByID(parseLong(id));
 
 		return new DiscordChannel(channel, new DiscordServer(channel.getGuild(), this));
 	}
 
 	@Override
 	public BotServer getServer(String id) {
-		return new DiscordServer(client.getGuildByID(id), this);
+		return new DiscordServer(client.getGuildByID(parseLong(id)), this);
 	}
 
+	private long parseLong(String num) {
+		return Long.parseLong(num);
+	}
+	
 	@Override
 	public String getClientName() {
 		return "Discord Bot (Double0negative)";
@@ -192,7 +201,7 @@ public class DiscordBot extends GenericBot{
 
 	@Override
 	public void log(String prefix, String log) {
-		log("[" + prefix + "] " + log);
+		log("[" + sdf.format(new Date()) + "] [" + prefix + "] " + log);
 	}
 
 	@Override
@@ -235,6 +244,10 @@ public class DiscordBot extends GenericBot{
 		client.changePlayingText(status);
 	}
 
+	
+	public IDiscordClient getClient() {
+		return this.client;
+	}
 
 
 

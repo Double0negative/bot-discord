@@ -23,7 +23,7 @@ public class DiscordUser implements BotUser{
 	
 	@Override
 	public String getId() {
-		return user.getID();
+		return user.getStringID();
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class DiscordUser implements BotUser{
 		List<String> sroles = new ArrayList<>();
 		
 		for(IRole role : roles) {
-			String str = role.getID();
+			String str = role.getStringID();
 			sroles.add(str);
 		}
 		return sroles;

@@ -82,7 +82,7 @@ public class DiscordServer implements BotServer {
 
 	@Override
 	public String getId() {
-		return guild.getID();
+		return guild.getStringID();
 	}
 
 

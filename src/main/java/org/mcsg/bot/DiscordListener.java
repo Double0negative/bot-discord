@@ -18,8 +18,8 @@ import org.mcsg.bot.command.CommandHandler;
 
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.audio.IAudioManager;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -66,7 +66,7 @@ public class DiscordListener {
 		IGuild guild = e.getGuild();
 		IUser user = e.getUser();
 
-		String id = bot.getSettings().getString("discord.joinmessage." + guild.getID());
+		String id = bot.getSettings().getString("discord.joinmessage." + guild.getStringID());
 		if(id != null) {
 			BotChannel chat = bot.getChat(id);
 

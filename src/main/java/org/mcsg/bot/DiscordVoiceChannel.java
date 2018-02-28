@@ -42,7 +42,7 @@ import sx.blah.discord.util.RateLimitException;
 public class DiscordVoiceChannel implements BotVoiceChannel{
 
 	private static final String DEFAULT_QUEUE = "_default";
-	
+
 	private IVoiceChannel channel;
 	private DiscordChannel chat;
 	private DiscordServer server;
@@ -50,7 +50,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	private AudioPlayerManager manager;
 	private AudioPlayer player;
 	private AudioProvider provider;
-	
+
 	private AudioQueue queue;
 
 	public DiscordVoiceChannel(IVoiceChannel channel,DiscordChannel chat, DiscordServer server, AudioPlayerManager manager) {
@@ -62,7 +62,7 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 
 	@Override
 	public String getId() {
-		return channel.getID();
+		return channel.getStringID();
 	}
 
 	@Override
@@ -113,21 +113,21 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 			channel.changeBitrate(96000);			
 			this.player = manager.createPlayer();
 			this.provider = new AudioProvider(player);
-			
+
 			server.getHandle().getAudioManager().setAudioProvider(provider);
-			
+
 			setupAudio();
 		} catch (MissingPermissionsException | DiscordException | RateLimitException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void setupAudio() {
 		this.queue = new AudioQueue(server.getBot(), player, chat);
 		this.player.addListener(this.queue);
 	}
 
-	
+
 	@Override
 	public void disconnect() {
 		channel.leave();
@@ -162,8 +162,8 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 		if(user != null) {
 			return user;
 		}
-		
-		
+
+
 		//fuzzy search from bukkit
 		String lowerName = name.toLowerCase(java.util.Locale.ENGLISH);
 		int delta = Integer.MAX_VALUE;
@@ -202,28 +202,28 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	@Override
 	public void play(String query) {
 		String queryString = "ytsearch: " + query;
-		
+
 		if(query.contains("http")) {
 			queryString = query;
 		}
-		
+
 		Future<Void> future = manager.loadItem(queryString, new AudioLoadResultHandler() {
-			
+
 			@Override
 			public void trackLoaded(AudioTrack track) {
 				queue.queue(track);
 			}
-			
+
 			@Override
 			public void playlistLoaded(AudioPlaylist list) {
 				queue.queue(list.getTracks().get(0));
 			}
-			
+
 			@Override
 			public void noMatches() {
 				chat.sendMessage("Could not play " + query + ". No tracks found.");
 			}
-			
+
 			@Override
 			public void loadFailed(FriendlyException arg0) {
 				arg0.printStackTrace();
@@ -235,5 +235,13 @@ public class DiscordVoiceChannel implements BotVoiceChannel{
 	}
 
 
-
+	@Override
+	public BotSentMessage debug(String msg) {
+		if(server.getBot().getSettings().getBoolean("debug", false)) {
+			return chat.sendMessage(msg);
+		} else {
+			return null;
+		}
+	}
 }
+

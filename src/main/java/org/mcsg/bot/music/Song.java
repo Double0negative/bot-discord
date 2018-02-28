@@ -4,7 +4,7 @@ import org.mcsg.bot.api.BotUser;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-public class Song {
+public class Song{
 
 	private AudioTrack track;
 	private BotUser player;
@@ -21,7 +21,14 @@ public class Song {
 		this.query = query;
 		this.player = player;
 	}
+	 
+	public AudioTrack getTrack() {
+		return this.track;
+	}
 	
+	public BotUser getUser() {
+		return player;
+	}
 	
 	
 }
