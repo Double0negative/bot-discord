@@ -26,10 +26,12 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.Image;
 
 public class DiscordBot extends GenericBot{
@@ -241,7 +243,7 @@ public class DiscordBot extends GenericBot{
 
 	@Override
 	public void setStatus(String status) {
-		client.changePlayingText(status);
+		client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, status);
 	}
 
 	
