@@ -27,14 +27,15 @@ class WeatherCommand implements BotCommand{
 	public void execute(String cmd, BotServer server, BotChannel chat, BotUser user, String[] args, String input)
 	throws Exception {
 		def key = server.getBot().getSettings().get("wunderground.apikey")
-		current(chat, key, input);
+		current(chat, key,  input.replace(" ", "%20"));
 	}
 
 
 	def current(chat, key, query) {
 		def dchat = chat as DiscordChannel
 
-		def url = StringUtils.replaceVars(CURRENT, key, query)
+		def url = StringUtils.replaceVars(CURRENT, key,query)
+		println url
 		def json = slurp.parse(new URL(url))
 
 
@@ -60,6 +61,8 @@ class WeatherCommand implements BotCommand{
 			}catch(e) {
 				e.printStackTrace()
 			}
+		} else {
+			chat.sendMessage("Location not found")
 		}
 
 
