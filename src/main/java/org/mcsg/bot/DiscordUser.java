@@ -6,64 +6,48 @@ import java.util.List;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.RequestBuffer;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 
 public class DiscordUser implements BotUser{
 
-	IUser user;
+	Member user;
 	
-	public DiscordUser(IUser user) {
+	public DiscordUser(Member user) {
 		this.user = user;
 	}
 	
 	@Override
 	public String getId() {
-		return user.getStringID();
+		System.out.println(user.getId().asString());
+		return user.getId().asString();
 	}
 
 	@Override
 	public String getUsername() {
-		return user.getName();
+		return user.getUsername();
 	}
 
 	@Override
 	public void sendMessage(String msg) {
-		try {
-			user.getOrCreatePMChannel().sendMessage(msg);
-		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
-			e.printStackTrace();
-		}
+		this.user.getPrivateChannel().subscribe(channel -> channel.createMessage(msg));
 	}
 
 	@Override
 	public List<String> getGroups(BotServer server) {
-		List<IRole> roles = user.getRolesForGuild(((DiscordServer)server).getHandle());
-		List<String> sroles = new ArrayList<>();
-		
-		for(IRole role : roles) {
-			String str = role.getStringID();
-			sroles.add(str);
-		}
-		return sroles;
+		Guild guild = ((DiscordServer)server).getHandle();
+		return new ArrayList<>();
 	}
 	
-	public void removeRole(IRole role) {
-		RequestBuffer.request(() -> {
-			user.removeRole(role);
-		});
+	public void removeRole(Role role) {
+		user.removeRole(role.getId());
 	}
 	
-	public void addRole(IRole role) {
-		RequestBuffer.request(() -> {
-			user.addRole(role);
-		});
+	public void addRole(Role role) {
+		user.addRole(role.getId());
 	}
-	public IUser getHandle() {
+	public Member getHandle() {
 		return user;
 	}
 	

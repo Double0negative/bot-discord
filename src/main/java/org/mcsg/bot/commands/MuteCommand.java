@@ -6,8 +6,6 @@ import org.mcsg.bot.api.BotCommand;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
-import sx.blah.discord.util.EmbedBuilder;
-
 public class MuteCommand implements BotCommand{
 
 	@Override

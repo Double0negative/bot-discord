@@ -3,23 +3,21 @@ package org.mcsg.bot;
 import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotSentMessage;
 
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.RequestBuffer;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.MessageChannel;
 
 public class DiscordSentMessage implements BotSentMessage{
 
-	private IMessage message;
+	private Message message;
+	private MessageChannel channel;
 	private DiscordBot bot;
 	
-	public DiscordSentMessage(IMessage message, DiscordBot bot) {
+	public DiscordSentMessage(Message message, MessageChannel channel, DiscordBot bot) {
 		this.message = message;
+		this.channel = channel;
 		this.bot = bot;
 	}
-	
-	
+
 	
 	@Override
 	public String getMessage() {
@@ -28,33 +26,17 @@ public class DiscordSentMessage implements BotSentMessage{
 
 	@Override
 	public BotChannel getChat() {
-		return new DiscordChannel(message.getChannel(), new DiscordServer(message.getGuild(), bot));
+		return new DiscordChannel(this.channel, new DiscordServer(message.getGuild().block(), bot));
 	}
 
 	@Override
 	public void edit(String msg) {
-		try {
-			message.edit(msg);
-		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		message.edit(spec -> spec.setContent(msg));
 	}
 
 	@Override
 	public void delete() {
-			RequestBuffer.request(() -> {
-				
-					try {
-						message.delete();
-					} catch (MissingPermissionsException | DiscordException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				
-			});
-		
-		
+		message.delete();
 	}
 
 

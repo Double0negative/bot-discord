@@ -8,15 +8,14 @@ import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Guild;
 
 public class DiscordServer implements BotServer {
 
-	IGuild guild;
-	DiscordBot bot;
+	private Guild guild;
+	private DiscordBot bot;
 	
-	public DiscordServer(IGuild guild, DiscordBot bot) {
+	public DiscordServer(Guild guild, DiscordBot bot) {
 		this.guild = guild;
 		this.bot = bot;
 	}
@@ -31,9 +30,6 @@ public class DiscordServer implements BotServer {
 	@Override
 	public List<BotUser> getUsers() {
 		List<BotUser> users = new ArrayList<>();
-		for(IUser user : guild.getUsers()) {
-			users.add(new DiscordUser(user));
-		}
 		return users;
 	}
 
@@ -75,14 +71,14 @@ public class DiscordServer implements BotServer {
 		return bot;
 	}
 	
-	public IGuild getHandle() {
+	public Guild getHandle() {
 		return guild;
 	}
 
 
 	@Override
 	public String getId() {
-		return guild.getStringID();
+		return guild.getId().asString();
 	}
 
 

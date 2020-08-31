@@ -1,11 +1,11 @@
 package org.mcsg.bot;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,27 +15,20 @@ import org.mcsg.bot.api.BotSentMessage;
 import org.mcsg.bot.api.BotServer;
 import org.mcsg.bot.api.BotUser;
 
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.obj.Embed;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.RequestBuffer;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.MessageChannel;
 
 public class DiscordChannel implements BotChannel {
 
 	private static final Set<String> muted = new HashSet<>();
 
-	private IChannel channel;
+	private MessageChannel channel;
 	private BotServer server;
 
 	private List<String> queue;
 
-	public DiscordChannel(IChannel channel, BotServer server) {
+	public DiscordChannel(MessageChannel channel, BotServer server) {
 		this.channel = channel;
 		this.server = server;
 
@@ -44,20 +37,13 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public String getId() {
-		return channel.getStringID();
+		return channel.getId().asString();
 	}
 
 	@Override
 	public List<BotUser> getUsers() {
-		List<IUser> users =  channel.getUsersHere();
-		List<BotUser> u = new ArrayList<>();
-
-		for(IUser user : users) {
-			u.add(new DiscordUser(user));
-		}
-		return u;
+		return new ArrayList<>();
 	}
-
 
 	@Override
 	public BotServer getServer() {
@@ -66,53 +52,27 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public BotSentMessage sendMessage(String msg) {
-		if(muted.contains(getId())) return null;
+		if (muted.contains(getId()))
+			return null;
 		BotSentMessage bsm = null;
-		try {
-			IMessage im = channel.sendMessage(limit(msg));
-			bsm = new DiscordSentMessage(im, (DiscordBot)getServer().getBot());
-		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Message im = channel.createMessage(limit(msg)).block();
+		bsm = new DiscordSentMessage(im, channel, (DiscordBot) getServer().getBot());
+
 		return bsm;
-	}
-
-	public void sendMessageBuffered(String msg) {
-		RequestBuffer.request(() -> {
-			channel.sendMessage(msg);
-		}).get();
-	}
-
-	public void sendMessage(EmbedObject obj) {
-		RequestBuffer.request(() -> {
-			try{
-				channel.sendMessage(obj);
-			} catch(RateLimitException e) {
-				System.out.println("Retry Delay:" + e.getRetryDelay());
-				throw e;
-			}
-		}).get();
 	}
 
 	@Override
 	public BotSentMessage sendError(String error) {
-		if(muted.contains(getId())) return null;
+		if (muted.contains(getId()))
+			return null;
 
-		BotSentMessage bsm = null;
-		try {
-			IMessage im = channel.sendMessage(limit("```Error: \n\n " + error + " ```"));
-			bsm = new DiscordSentMessage(im, (DiscordBot) getServer().getBot());
-		} catch (MissingPermissionsException | RateLimitException | DiscordException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return bsm;
+		return this.sendMessage(limit("```Error: \n\n " + error + " ```"));
 	}
 
 	@Override
 	public void sendThrowable(Throwable throwable) {
-		if(muted.contains(getId())) return;
+		if (muted.contains(getId()))
+			return;
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -128,40 +88,41 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public BotSentMessage commitMessage() {
-		if(muted.contains(getId())) return null;
+		if (muted.contains(getId()))
+			return null;
 
 		StringBuilder sb = new StringBuilder();
-		for(String msg : queue)
+		for (String msg : queue)
 			sb.append(msg).append("\n");
 		return sendMessage(sb.toString());
 	}
 
 	@Override
-	public void sendFile(File file) throws Exception{
-		RequestBuffer.request(() -> {
+	public void sendFile(File file) throws Exception {
+		System.out.println("Sending " + file.getAbsolutePath());
+		channel.createMessage(spec -> {
 			try {
-				channel.sendFile(file);
+				spec.addFile(file.getName(), new FileInputStream(file));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-		});
+		}).subscribe();
 	}
 
 	@Override
 	public String getName() {
-		return channel.getName();
+		return channel.getId().asString();
 	}
 
-
 	public String limit(String str) {
-		if(str.length() >= 2000) {
+		if (str.length() >= 2000) {
 			return str.substring(0, 1999);
 		}
 		return str;
 	}
 
 	public void mute(boolean mute) {
-		if(mute) {
+		if (mute) {
 			muted.add(getId());
 		} else {
 			muted.remove(getId());
@@ -171,12 +132,11 @@ public class DiscordChannel implements BotChannel {
 	@Override
 	public BotUser getUserByName(String name) {
 		BotUser user = getUserByNameExact(name);
-		if(user != null) {
+		if (user != null) {
 			return user;
 		}
 
-
-		//fuzzy search from bukkit
+		// fuzzy search from bukkit
 		String lowerName = name.toLowerCase(java.util.Locale.ENGLISH);
 		int delta = Integer.MAX_VALUE;
 		for (BotUser player : getUsers()) {
@@ -186,15 +146,16 @@ public class DiscordChannel implements BotChannel {
 					user = player;
 					delta = curDelta;
 				}
-				if (curDelta == 0) break;
+				if (curDelta == 0)
+					break;
 			}
 		}
 		return user;
 	}
 
 	public BotUser getUserByNameExact(String name) {
-		for(BotUser user : getUsers()) {
-			if(user.getUsername().equalsIgnoreCase(name)) {
+		for (BotUser user : getUsers()) {
+			if (user.getUsername().equalsIgnoreCase(name)) {
 				return user;
 			}
 		}
@@ -203,24 +164,21 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void clear() {
-		try{
-			channel.bulkDelete();
-		}catch (Exception e){
-			e.printStackTrace();;
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public List<BotSentMessage> getMessages() {
-		List<BotSentMessage> messages = new ArrayList<>();
-
-		for(IMessage msg : channel.getMessageHistory()) {
-			messages.add(new DiscordSentMessage(msg, (DiscordBot) getServer().getBot()));
-		}
-		return messages;
+		throw new UnsupportedOperationException();
+//		List<BotSentMessage> messages = new ArrayList<>();
+//
+//		for (Message msg : channel.getMessageHistory()) {
+//			messages.add(new DiscordSentMessage(msg, (DiscordBot) getServer().getBot()));
+//		}
+//		return messages;
 	}
 
-	public IChannel getHandle() {
+	public Channel getHandle() {
 		return channel;
 	}
 
@@ -228,12 +186,11 @@ public class DiscordChannel implements BotChannel {
 	public BotSentMessage debug(String msg) {
 		System.out.println("DEUBG" + server.getBot().getSettings().getBoolean("bot.debug", false));
 
-		if(server.getBot().getSettings().getBoolean("bot.debug", false)) {
+		if (server.getBot().getSettings().getBoolean("bot.debug", false)) {
 			return sendMessage(msg);
 		} else {
 			return null;
 		}
 	}
-
 
 }
