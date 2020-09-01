@@ -89,10 +89,8 @@ public class DiscordBot extends GenericBot {
 			this.pluginManager = new PluginManager(this);
 			this.pluginManager.load();
 			this.pluginManager.enableAll();
-
-			this.client.on(MessageCreateEvent.class).subscribe(message -> System.out.println(message.getMessage()));
 		    
-			this.client.getEventDispatcher().on(MessageCreateEvent.class)
+			this.client.on(MessageCreateEvent.class)
 		        .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
 		        .subscribe(event -> messageReceivedHandler(event));
 		} catch (Exception e) {
