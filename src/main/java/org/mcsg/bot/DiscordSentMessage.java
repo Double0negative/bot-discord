@@ -31,7 +31,7 @@ public class DiscordSentMessage implements BotSentMessage{
 
 	@Override
 	public void edit(String msg) {
-		message.edit(spec -> spec.setContent(msg));
+		message.edit(spec -> spec.setContent(msg)).subscribe();
 	}
 
 	@Override
