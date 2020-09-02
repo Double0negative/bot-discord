@@ -14,6 +14,7 @@ import org.mcsg.bot.plugin.PluginManager;
 import org.mcsg.bot.util.DelayedActionMessage;
 import org.mcsg.bot.util.StringUtils;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
@@ -24,6 +25,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 
 public class DiscordBot extends GenericBot {
@@ -81,14 +83,17 @@ public class DiscordBot extends GenericBot {
 //			AudioSourceManagers.registerRemoteSources(audioManager);
 //			AudioSourceManagers.registerLocalSource(audioManager);
 
+			
+			this.setDefaultChannel(this.getChat(this.getSettings().getString("discord.default-channel")));
 			this.permissionsManager = new GenericPermissionManager(this);
-			getCommandHandler().registerCommand(new MuteCommand());
-			getCommandHandler().registerCommand(new ClearCommand());
+			getCommandHandler().registerCommand(null, new MuteCommand());
+			getCommandHandler().registerCommand(null, new ClearCommand());
 //			getCommandHandler().registerCommand(new WeatherCommand());
+			getCommandHandler().disableNullPluginRegistration();
 
 			this.pluginManager = new PluginManager(this);
 			this.pluginManager.load();
-			this.pluginManager.enableAll();
+			this.pluginManager.enableAll(this.getDefaultChat());
 		    
 			this.client.on(MessageCreateEvent.class)
 		        .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
@@ -149,10 +154,9 @@ public class DiscordBot extends GenericBot {
 
 	@Override
 	public BotChannel getChat(String id) {
-//		IChannel channel = client.getChannelByID(parseLong(id));
-
-//		return new DiscordChannel(channel, new DiscordServer(channel.getGuild(), this));
-		return null;
+		GuildChannel channel = client.getChannelById(Snowflake.of(id)).ofType(GuildChannel.class).block();
+		Guild guild = channel.getGuild().block();
+		return new DiscordChannel((MessageChannel)channel, new DiscordServer(guild, this));
 	}
 
 	@Override
@@ -257,6 +261,11 @@ public class DiscordBot extends GenericBot {
 
 	public GatewayDiscordClient getClient() {
 		return this.client;
+	}
+
+	@Override
+	public PluginManager getPluginManager() {
+		return this.pluginManager;
 	}
 
 }
