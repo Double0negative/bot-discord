@@ -2,6 +2,7 @@ package org.mcsg.bot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mcsg.bot.api.Bot;
 import org.mcsg.bot.api.BotChannel;
@@ -29,8 +30,7 @@ public class DiscordServer implements BotServer {
 
 	@Override
 	public List<BotUser> getUsers() {
-		List<BotUser> users = new ArrayList<>();
-		return users;
+		return guild.getMembers().buffer().blockFirst().stream().map((dm) -> new DiscordUser(dm)).collect(Collectors.toList());
 	}
 
 	@Override

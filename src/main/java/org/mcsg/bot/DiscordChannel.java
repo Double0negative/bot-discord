@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.mcsg.bot.api.BotChannel;
 import org.mcsg.bot.api.BotSentMessage;
@@ -18,6 +19,7 @@ import org.mcsg.bot.api.BotUser;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class DiscordChannel implements BotChannel {
 
@@ -42,7 +44,8 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public List<BotUser> getUsers() {
-		return new ArrayList<>();
+		return (channel instanceof TextChannel) ? ((TextChannel) channel).getMembers().buffer().blockFirst().stream().map((dm) -> new DiscordUser(dm))
+				.collect(Collectors.toList()) : new ArrayList<>();
 	}
 
 	@Override
