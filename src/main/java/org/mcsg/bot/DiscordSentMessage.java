@@ -36,7 +36,7 @@ public class DiscordSentMessage implements BotSentMessage{
 
 	@Override
 	public void delete() {
-		message.delete();
+		message.delete().subscribe();
 	}
 
 

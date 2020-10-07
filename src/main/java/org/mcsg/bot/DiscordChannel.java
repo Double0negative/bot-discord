@@ -99,9 +99,16 @@ public class DiscordChannel implements BotChannel {
 
 	@Override
 	public void sendFile(File file) throws Exception {
+		this.sendFile(file, null);
+	}
+
+	@Override
+	public void sendFile(File file, String msg) throws Exception {
 		System.out.println("Sending " + file.getAbsolutePath());
 		channel.createMessage(spec -> {
 			try {
+				if (msg != null)
+					spec.setContent(msg);
 				spec.addFile(file.getName(), new FileInputStream(file));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
